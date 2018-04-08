@@ -2,6 +2,7 @@ from .mongo import Mongo
 from .redis_cli import RedisPool
 
 from bson.objectid import ObjectId
+from yajl import dumps
 
 
 class Job:
@@ -65,4 +66,6 @@ class JobQueue:
         })
         id = inserted_row.inserted_id
         redis = self.redis_pool.get_connection()
-        redis.pubsub()
+        redis.publish(self.collection_name, dumps({
+            "job_id": id
+        }))
