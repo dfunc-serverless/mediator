@@ -58,14 +58,22 @@ class JobQueue:
         self.redis_pool = RedisPool()
         self.mongo_cli = Mongo("dfunc")
 
+    def __get_db(self):
+        return self.mongo_cli.get_database(self.collection_name)
+
     def add_job(self, job):
-        jq_table = self.mongo_cli.get_database(self.collection_name)
+        jq_table = self.__get_db()
         inserted_row = jq_table.insert_one({
             "job": job,
             "worker_id": None
         })
-        id = inserted_row.inserted_id
+        job_id = inserted_row.inserted_id
         redis = self.redis_pool.get_connection()
         redis.publish(self.collection_name, dumps({
-            "job_id": id
+            "job_id": job_id
         }))
+
+    def pull_job(self, job_id):
+        jq_table = self.__get_db()
+        job = jq_table.find_one({"_id": ObjectId(job_id)})
+        return job
