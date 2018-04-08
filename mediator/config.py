@@ -2,9 +2,11 @@ from os import environ
 
 
 class Config:
+    # Config cache
+    cache = {}
 
-    @staticmethod
-    def get(name, default=None):
+    @classmethod
+    def get(cls, name, default=None):
         """
         Fetch configurations from Environment variables.
         Pattern: DFUNC_<name of var>
@@ -13,8 +15,12 @@ class Config:
         :return: returns content of the variable
         """
         name = "DFUNC_%s" % name.upper()
+        if name in cls.cache:
+            return cls.cache[name]
         if name in environ:
-            return environ[name]
+            val = environ[name]
+            cls.cache[name] = val
+            return
         elif default is not None:
             return default
         else:
