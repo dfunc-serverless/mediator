@@ -14,6 +14,8 @@ class Job:
         """
         self.job_id = job_id
         job_table = self.mongo_cli.get_database(collection="jobs")
+        if job_table.count() == 0:
+            job_table.create_index("user_id")
         self.data = job_table.find_one({"_id": ObjectId(self.job_id)})
         if self.data is None:
             raise KeyError("ID not found")
@@ -41,7 +43,7 @@ class Job:
             "image": image_dict,
             "user": user_id
         })
-        return cls(str(data["_id"]))
+        return cls(str(data.inserted_id))
 
 
 class JobQueue:
@@ -54,3 +56,13 @@ class JobQueue:
         self.collection_name = name + "_job_queue"
         self.redis_pool = RedisPool()
         self.mongo_cli = Mongo("dfunc")
+
+    def add_job(self, job):
+        jq_table = self.mongo_cli.get_database(self.collection_name)
+        inserted_row = jq_table.insert_one({
+            "job": job,
+            "worker_id": None
+        })
+        id = inserted_row.inserted_id
+        redis = self.redis_pool.get_connection()
+        redis.pubsub()

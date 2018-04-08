@@ -29,7 +29,7 @@ class Mongo:
 
     def close(self):
         """
-        Closes
+        Closes Mongo Connection
         :return:
         """
         self.mongo_cli.close()
