@@ -3,7 +3,7 @@ from os import environ
 
 class Config:
     # Config cache
-    cache = {}
+    __cache = {}
 
     @classmethod
     def get(cls, name, default=None):
@@ -15,11 +15,11 @@ class Config:
         :return: returns content of the variable
         """
         name = "DFUNC_%s" % name.upper()
-        if name in cls.cache:
-            return cls.cache[name]
+        if name in cls.__cache:
+            return cls.__cache[name]
         if name in environ:
             val = environ[name]
-            cls.cache[name] = val
+            cls.__cache[name] = val
             return
         elif default is not None:
             return default

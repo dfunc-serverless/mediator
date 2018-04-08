@@ -2,7 +2,7 @@ from .mongo import Mongo
 from .redis_cli import RedisPool
 
 from bson.objectid import ObjectId
-from yajl import dumps
+
 
 
 class Job:
@@ -20,6 +20,9 @@ class Job:
         self.data = job_table.find_one({"_id": ObjectId(self.job_id)})
         if self.data is None:
             raise KeyError("ID not found")
+
+    def get_data(self):
+        return self.data
 
     @classmethod
     def job_factory(cls, job_name, user_id, image_dict, file_url=None):
@@ -59,21 +62,36 @@ class JobQueue:
         self.mongo_cli = Mongo("dfunc")
 
     def __get_db(self):
+        """
+        Get JobQueue DB
+        :return:
+        """
         return self.mongo_cli.get_database(self.collection_name)
 
-    def add_job(self, job):
+    def add_job(self, job: Job, data: dict=None):
+        """
+        Adding Job to the Queue
+        :param job: Job Object
+        :param data: Data passed as Params
+        :return: Job_ID from the Queue
+        """
         jq_table = self.__get_db()
         inserted_row = jq_table.insert_one({
-            "job": job,
-            "worker_id": None
+            "job": job.get_data(),
+            "worker_id": None,
+            "data": data
         })
-        job_id = inserted_row.inserted_id
+        job_id = str(inserted_row.inserted_id)
         redis = self.redis_pool.get_connection()
-        redis.publish(self.collection_name, dumps({
-            "job_id": job_id
-        }))
+        redis.publish(self.collection_name, job_id)
+        return job_id
 
     def pull_job(self, job_id):
+        """
+        Pull Jobs from Queue
+        :param job_id: JobQueue ID
+        :return: Job data
+        """
         jq_table = self.__get_db()
         job = jq_table.find_one({"_id": ObjectId(job_id)})
         return job
