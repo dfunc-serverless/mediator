@@ -4,7 +4,6 @@ from .redis_cli import RedisPool
 from bson.objectid import ObjectId
 
 
-
 class Job:
     mongo_cli = Mongo("dfunc")
 
@@ -68,7 +67,7 @@ class JobQueue:
         """
         return self.mongo_cli.get_database(self.collection_name)
 
-    def add_job(self, job: Job, data: dict=None):
+    def add_job(self, job: Job, data: dict = None):
         """
         Adding Job to the Queue
         :param job: Job Object
