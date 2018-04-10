@@ -39,3 +39,7 @@ def register_job(api_key, worker_id, job_id):
             worker.add_job(job)
             return job.get_data(json=True)
     abort(400)
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8888)

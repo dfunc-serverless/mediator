@@ -59,7 +59,7 @@ class Job:
             "name": job_name,
             "file": file_url,
             "image": image_dict,
-            "user_id": user_id
+            "user_id": ObjectId(user_id)
         })
         return cls(str(data.inserted_id))
 
