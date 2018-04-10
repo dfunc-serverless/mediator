@@ -80,7 +80,7 @@ class JobQueue:
         Get JobQueue DB
         :return: DB instance
         """
-        return self.mongo_cli.get_database(self.collection_name)
+        return self.mongo_cli.get_database(collection=self.collection_name)
 
     def add_job(self, job: Job, data: dict = None):
         """

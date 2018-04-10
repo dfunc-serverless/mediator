@@ -14,7 +14,7 @@ class RedisPool:
             DFUNC_REDIS_DB      | 0
         """
         self.host = Config.get("redis_host", default="127.0.0.1")
-        self.port = Config.get("redis_port", default=6397)
+        self.port = Config.get("redis_port", default=6379)
         self.db = Config.get("redis_db", default=0)
         self.pool = redis.ConnectionPool(
             host=self.host, port=self.port, db=self.db)
