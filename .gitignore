@@ -206,3 +206,4 @@ fabric.properties
 
 
 # End of https://www.gitignore.io/api/macos,pycharm,visualstudiocode
+*.json
