@@ -1,8 +1,12 @@
-from flask import Flask, request, abort
+from json import loads
 
-from mediator import trigger, Auth, Worker, Job
+from flask import Flask, request, abort, jsonify
+
+from mediator import trigger, Auth, Worker, Job, Config
 
 app = Flask(__name__)
+RECEIVER_FILE_PATH = Config.get("receiver_file", "dfunc-bu-receiver.json")
+RECEIVER_FILE = loads(open(RECEIVER_FILE_PATH, 'r').read())
 
 
 @app.route("/")
@@ -26,7 +30,10 @@ def create_worker(api_key):
     if Auth.verify_auth_key(api_key):
         worker = Worker.worker_factory(api_key)
         worker.push_to_queue()
-        return worker.worker_id
+        return jsonify({
+            "worker_id": worker.worker_id,
+            "subscriber_json": RECEIVER_FILE
+        })
     return abort(400)
 
 
