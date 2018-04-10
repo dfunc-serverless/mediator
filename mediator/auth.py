@@ -1,4 +1,6 @@
 from .mongo import Mongo
+from .job import Job
+from .worker import Worker
 
 from bson.objectid import ObjectId
 
@@ -29,7 +31,17 @@ class Auth:
         """
         key = ObjectId(job_id)
         user_id = ObjectId(auth_key)
-        db = cls.mongo_cli.get_database(collection="jobs")
+        db = cls.mongo_cli.get_database(collection=Job.collection_name)
         if db.count({"_id": key, "user_id": user_id}) > 0:
             return True
         return False
+
+    @classmethod
+    def verify_worker(cls, auth_key, worker_id):
+        worker_id = ObjectId(worker_id)
+        user_id = ObjectId(auth_key)
+        db = cls.mongo_cli.get_database(collection=Worker.collection_name)
+        if db.count({"_id": worker_id, "user_id": user_id}) > 0:
+            return True
+        else:
+            return False

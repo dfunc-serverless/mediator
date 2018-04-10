@@ -2,10 +2,20 @@ from .mongo import Mongo
 from .redis_cli import RedisPool
 
 from bson.objectid import ObjectId
+from bson.json_util import dumps
 
 
 class Job:
     mongo_cli = Mongo("dfunc")
+    collection_name = "jobs"
+
+    @classmethod
+    def __get_db(cls):
+        """
+        Get Job DB
+        :return: DB instance
+        """
+        return cls.mongo_cli.get_database(collection=cls.collection_name)
 
     def __init__(self, job_id):
         """
@@ -13,15 +23,20 @@ class Job:
         :param job_id:
         """
         self.job_id = job_id
-        job_table = self.mongo_cli.get_database(collection="jobs")
+        job_table = self.__get_db()
         if job_table.count() == 0:
             job_table.create_index("user_id")
         self.data = job_table.find_one({"_id": ObjectId(self.job_id)})
         if self.data is None:
             raise KeyError("ID not found")
 
-    def get_data(self):
-        return self.data
+    def get_data(self, json=False):
+        """
+        Get data
+        :param json: get data as a JSON dump
+        :return: data dictionary
+        """
+        return dumps(self.data) if json else self.data
 
     @classmethod
     def job_factory(cls, job_name, user_id, image_dict, file_url=None):
@@ -39,12 +54,12 @@ class Job:
         :param file_url: URL of the serverless function (optional)
         :return: object of type Job
         """
-        job_table = cls.mongo_cli.get_database(collection="jobs")
+        job_table = cls.__get_db()
         data = job_table.insert_one({
             "name": job_name,
             "file": file_url,
             "image": image_dict,
-            "user": user_id
+            "user_id": user_id
         })
         return cls(str(data.inserted_id))
 
@@ -63,7 +78,7 @@ class JobQueue:
     def __get_db(self):
         """
         Get JobQueue DB
-        :return:
+        :return: DB instance
         """
         return self.mongo_cli.get_database(self.collection_name)
 
