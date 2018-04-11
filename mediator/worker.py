@@ -34,6 +34,8 @@ class Worker:
         self.project = Config.get("project_name", "dfunc-bu")
         self.subscription_string = "projects/%s/topics/worker-%s" % \
                                    (self.project, worker_id)
+        self.subscription_name = "projects/%s/subscription/worker-%s" % \
+                                   (self.project, worker_id)
 
     @classmethod
     def worker_factory(cls, user_id, job=None):

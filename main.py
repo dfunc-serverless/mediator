@@ -48,7 +48,8 @@ def create_worker(api_key):
         return jsonify({
             "worker_id": worker.worker_id,
             "subscriber_json": RECEIVER_FILE,
-            "subscription_string": worker.subscription_string
+            "subscription_string": worker.subscription_string,
+            "subscription_name": worker.subscription_name
         })
     return abort(400)
 
