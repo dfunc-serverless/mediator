@@ -47,7 +47,8 @@ def create_worker(api_key):
         worker.push_to_queue()
         return jsonify({
             "worker_id": worker.worker_id,
-            "subscriber_json": RECEIVER_FILE
+            "subscriber_json": RECEIVER_FILE,
+            "subscription_string": worker.subscription_string
         })
     return abort(400)
 

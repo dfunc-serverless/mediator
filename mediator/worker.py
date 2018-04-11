@@ -1,3 +1,4 @@
+from .config import Config
 from .mongo import Mongo
 from .redis_cli import RedisPool
 
@@ -30,6 +31,9 @@ class Worker:
             raise KeyError("Worker not registered")
         self.worker_id = worker_id
         self.data = data
+        self.project = Config.get("project_name", "dfunc-bu")
+        self.subscription_string = "projects/%s/topics/worker-%s" % \
+                                   (self.project, worker_id)
 
     @classmethod
     def worker_factory(cls, user_id, job=None):
