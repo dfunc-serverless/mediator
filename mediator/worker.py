@@ -44,8 +44,8 @@ class Worker:
             "job": job
         }
         db = cls.__get_db()
-        inserted_row = db.insert_one(data)
-        return cls(str(inserted_row.inserted_id))
+        inserted_id = db.save(data)
+        return cls(str(inserted_id))
 
     def push_to_queue(self):
         """
@@ -58,15 +58,15 @@ class Worker:
         if self.data["job"] is not None:
             self.data["job"] = job.get_data()
             db = self.__get_db()
-            db.insert_one(self.data)
+            db.save(self.data)
         else:
             raise ValueError("Job already assigned")
 
     def remove_job(self):
         self.data["job"] = None
         db = self.__get_db()
-        db.insert_one(self.data)
+        db.save(self.data)
 
-    def __del__(self):
+    def delete(self):
         db = self.__get_db()
         db.delete_one({"_id": ObjectId(self.worker_id)})

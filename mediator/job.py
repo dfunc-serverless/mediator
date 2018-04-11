@@ -55,13 +55,13 @@ class Job:
         :return: object of type Job
         """
         job_table = cls.__get_db()
-        data = job_table.insert_one({
+        data_id = job_table.save({
             "name": job_name,
             "file": file_url,
             "image": image_dict,
             "user_id": ObjectId(user_id)
         })
-        return cls(str(data.inserted_id))
+        return cls(str(data_id))
 
 
 class JobQueue:
@@ -90,12 +90,12 @@ class JobQueue:
         :return: Job_ID from the Queue
         """
         jq_table = self.__get_db()
-        inserted_row = jq_table.insert_one({
+        inserted_id = jq_table.save({
             "job": job.get_data(),
             "worker_id": None,
             "data": data
         })
-        job_id = str(inserted_row.inserted_id)
+        job_id = str(inserted_id)
         redis = self.redis_pool.get_connection()
         redis.publish(self.collection_name, job_id)
         return job_id

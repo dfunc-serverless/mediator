@@ -11,11 +11,21 @@ RECEIVER_FILE = loads(open(RECEIVER_FILE_PATH, 'r').read())
 
 @app.route("/")
 def index():
+    """
+    Get Hello World at Index
+    :return:
+    """
     return "Hello World"
 
 
 @app.route("/trigger/<api_key>/<job_id>")
 def add_job(api_key, job_id):
+    """
+    To trigger a job
+    :param api_key: user id of the client
+    :param job_id: job to be executed
+    :return: job queue id
+    """
     if Auth.verify_auth_key(api_key):
         if Auth.verify_job(api_key, job_id):
             data = None
@@ -27,6 +37,11 @@ def add_job(api_key, job_id):
 
 @app.route("/worker/<api_key>")
 def create_worker(api_key):
+    """
+    To register a worker node
+    :param api_key: user id
+    :return: worker id
+    """
     if Auth.verify_auth_key(api_key):
         worker = Worker.worker_factory(api_key)
         worker.push_to_queue()
@@ -37,8 +52,34 @@ def create_worker(api_key):
     return abort(400)
 
 
+@app.route("/worker/<api_key>/<worker_id>")
+def register_worker(api_key, worker_id):
+    """
+    Register worker to schedule jobs
+    :param api_key: user id
+    :param worker_id: worker id
+    :return: worker id
+    """
+    if Auth.verify_auth_key(api_key):
+        if Auth.verify_worker(api_key, worker_id):
+            worker = Worker(worker_id)
+            worker.remove_job()
+            worker.push_to_queue()
+            return jsonify({
+                "worker_id": worker.worker_id
+            })
+    return abort(400)
+
+
 @app.route("/worker/<api_key>/<worker_id>/<job_id>")
 def register_job(api_key, worker_id, job_id):
+    """
+    Confirm contract between Job and worker
+    :param api_key:
+    :param worker_id:
+    :param job_id:
+    :return:
+    """
     if Auth.verify_auth_key(api_key):
         if Auth.verify_worker(api_key, worker_id):
             job = Job(job_id)
