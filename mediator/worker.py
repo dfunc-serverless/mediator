@@ -1,6 +1,7 @@
 from .config import Config
 from .mongo import Mongo
 from .redis_cli import RedisPool
+from .job import Job
 
 from bson.objectid import ObjectId
 
@@ -35,7 +36,7 @@ class Worker:
         self.subscription_string = "projects/%s/topics/worker-%s" % \
                                    (self.project, worker_id)
         self.subscription_name = "projects/%s/subscriptions/worker-%s" % \
-                                   (self.project, worker_id)
+                                 (self.project, worker_id)
 
     @classmethod
     def worker_factory(cls, user_id, job=None):
@@ -60,19 +61,30 @@ class Worker:
         redis = self.redis_pool.get_connection()
         redis.publish(self.collection_name, self.worker_id)
 
-    def add_job(self, job):
+    def add_job(self, job: Job):
+        """
+        Associates job with worker
+        :param job: job (Job)
+        :return:
+        """
         if self.data["job"] is not None:
-            self.data["job"] = job.get_data()
+            self.data["job"] = job.job_id
             db = self.__get_db()
             db.save(self.data)
         else:
             raise ValueError("Job already assigned")
 
     def remove_job(self):
+        """
+        Removes any associated job from the worker
+        """
         self.data["job"] = None
         db = self.__get_db()
         db.save(self.data)
 
     def delete(self):
+        """
+        Deletes the worker
+        """
         db = self.__get_db()
         db.delete_one({"_id": ObjectId(self.worker_id)})

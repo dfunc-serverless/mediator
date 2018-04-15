@@ -45,12 +45,12 @@ class Job:
         :param job_name: name of th job
         :param user_id: name of the user
         :param image_dict: dictionary containing docker image metadata
-                        {
-                            "name": "<name of the docker image with repo>",
-                            "tag": "<name of the tag to be pulled>",
-                            "username": "username (for private repo's)",
-                            "password": "password (for private repo's)"
-                        }
+            {
+                "name": "<name of the docker image with repo>",
+                "tag": "<name of the tag to be pulled>",
+                "username": "username (for private repo's)",
+                "password": "password (for private repo's)"
+            }
         :param file_url: URL of the serverless function (optional)
         :return: object of type Job
         """
@@ -63,8 +63,24 @@ class Job:
         })
         return cls(str(data_id))
 
+    def delete(self):
+        """
+        Deletes the job
+        """
+        db = self.__get_db()
+        db.delete_one({"_id": ObjectId(self.job_id)})
+
 
 class JobQueue:
+    """
+    Job Queue to schedule jobs
+    Status pattern:
+        0: In queue
+        1: Executing
+        2: Completed
+        3: Failed
+    """
+
     def __init__(self, name):
         """
         Job Queue class
@@ -93,19 +109,44 @@ class JobQueue:
         inserted_id = jq_table.save({
             "job": job.get_data(),
             "worker_id": None,
-            "data": data
+            "data": data,
+            "status": 0
         })
-        job_id = str(inserted_id)
+        jq_id = str(inserted_id)
         redis = self.redis_pool.get_connection()
-        redis.publish(self.collection_name, job_id)
-        return job_id
+        redis.publish(self.collection_name, jq_id)
+        return jq_id
 
-    def pull_job(self, job_id):
+    def pull_job(self, jq_id):
         """
         Pull Jobs from Queue
-        :param job_id: JobQueue ID
+        :param jq_id: JobQueue ID
         :return: Job data
         """
         jq_table = self.__get_db()
-        job = jq_table.find_one({"_id": ObjectId(job_id)})
-        return job
+        job = jq_table.find_one({"_id": ObjectId(jq_id)})
+        if job is None:
+            raise KeyError("Job not found")
+        return Job(str(job["job"]["_id"]))
+
+    def update_status(self, jq_id, status: int):
+        """
+        Status pattern:
+            0: In queue
+            1: Executing
+            2: Completed
+            3: Failed
+        :param jq_id: ID of job Queue
+        :param status: Status (int)
+        """
+        jq_table = self.__get_db()
+        job = jq_table.find_one({"_id": ObjectId(jq_id)})
+        job["status"] = status
+        jq_table.insert_one(job)
+
+    def delete(self, jq_id):
+        """
+        Deletes the worker
+        """
+        db = self.__get_db()
+        db.delete_one({"_id": ObjectId(jq_id)})
