@@ -17,7 +17,7 @@ def index():
     Get Hello World at Index
     :return:
     """
-    return "Hello World"
+    return "Hello World", 200
 
 
 @app.route("/trigger/<api_key>/<job_id>", methods=["GET", "POST"])
@@ -74,7 +74,8 @@ def register_worker(api_key, worker_id):
     return abort(400)
 
 
-@app.route("/worker/<api_key>/<worker_id>/<jq_id>", methods=["PUT"])
+@app.route("/worker/<api_key>/<worker_id>/<jq_id>",
+           methods=["PUT", "POST", "DELETE"])
 def register_job(api_key, worker_id, jq_id):
     """
     Confirm contract between Job and worker
@@ -85,10 +86,23 @@ def register_job(api_key, worker_id, jq_id):
     """
     if Auth.verify_auth_key(api_key):
         if Auth.verify_worker(api_key, worker_id):
-            job = trigger.initiate_job(jq_id)
             worker = Worker(worker_id)
-            worker.add_job(job)
-            return jsonify(job.get_data())
+            if request.method == "PUT":
+                job = trigger.initiate_job(jq_id)
+                worker.add_job(job)
+                return jsonify(job.get_data())
+            elif request.method == "POST":
+                data = None
+                if request.data:
+                    data = request.get_json()
+                worker.remove_job()
+                trigger.complete_job(jq_id, 2, data)
+                return "", 200
+            elif request.method == "DELETE":
+                data = request.data
+                worker.remove_job()
+                trigger.complete_job(jq_id, 3, data)
+                return "", 200
     abort(400)
 
 

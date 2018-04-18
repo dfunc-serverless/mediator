@@ -26,3 +26,13 @@ class Trigger:
         job = self.job_queue.pull_job(jq_id)
         self.job_queue.update_status(jq_id, 1)  # Set to executing
         return job
+
+    def complete_job(self, jq_id, status: int, data=None):
+        """
+        Updates job status
+        :param jq_id:
+        :param status:
+        :param data:
+        :return:
+        """
+        self.job_queue.update_status(jq_id, status, data)
