@@ -2,5 +2,4 @@ flask
 flask-restful
 pymongo
 redis
-yajl
 google-cloud-pubsub

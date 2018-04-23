@@ -1,4 +1,4 @@
-FROM python:3-alpine3.7
+FROM python:3.6.5
 
 # Making my life suck
 LABEL Maintianer="Anish Gupta"
@@ -12,7 +12,7 @@ COPY . /home/app
 WORKDIR /home/app
 
 # Installing utils and deps
-RUN apk install g++
-RUN pip3 install -r -U requirements.txt
+RUN apt update && apt install -y gcc git python-dev
+RUN pip install -r requirements.txt
 
 ENTRYPOINT [ "python3", "main.py" ]
