@@ -10,9 +10,13 @@ EXPOSE 8888
 RUN mkdir -p /home/app
 COPY . /home/app
 WORKDIR /home/app
+ENTRYPOINT [ "pipenv", "run", "python", "main.py" ]
 
 # Installing utils and deps
-RUN apt update && apt install -y gcc git python-dev
-RUN pip install -r requirements.txt
+RUN apt-get update \
+    && apt-get install -y gcc git python-dev \
+    && apt-get clean
 
-ENTRYPOINT [ "python3", "main.py" ]
+RUN pip install pipenv
+
+RUN pipenv install

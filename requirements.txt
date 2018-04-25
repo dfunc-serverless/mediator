@@ -1,5 +1,0 @@
-flask
-flask-restful
-pymongo
-redis
-google-cloud-pubsub
