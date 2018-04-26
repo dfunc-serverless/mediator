@@ -94,12 +94,12 @@ def register_job(api_key, worker_id, jq_id):
             elif request.method == "POST":
                 data = None
                 if request.data:
-                    data = request.get_json()
+                    data = str(request.data)
                 worker.remove_job()
                 trigger.complete_job(jq_id, 2, data)
                 return "", 200
             elif request.method == "DELETE":
-                data = request.data
+                data = str(request.data)
                 worker.remove_job()
                 trigger.complete_job(jq_id, 3, data)
                 return "", 200
