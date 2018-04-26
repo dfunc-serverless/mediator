@@ -90,7 +90,7 @@ def register_job(api_key, worker_id, jq_id):
             if request.method == "PUT":
                 job = trigger.initiate_job(jq_id)
                 worker.add_job(job)
-                return jsonify(job.get_data())
+                return jsonify(job.get_data(json=True))
             elif request.method == "POST":
                 data = None
                 if request.data:

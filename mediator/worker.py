@@ -67,12 +67,9 @@ class Worker:
         :param job: job (Job)
         :return:
         """
-        if self.data["job"] is not None:
-            self.data["job"] = job.job_id
-            db = self.__get_db()
-            db.save(self.data)
-        else:
-            raise ValueError("Job already assigned")
+        self.data["job"] = job.job_id
+        db = self.__get_db()
+        db.save(self.data)
 
     def remove_job(self):
         """

@@ -143,7 +143,7 @@ class JobQueue:
         job = jq_table.find_one({"_id": ObjectId(jq_id)})
         job["status"] = status
         job["data"] = data
-        jq_table.insert_one(job)
+        jq_table.save(job)
 
     def delete(self, jq_id):
         """
