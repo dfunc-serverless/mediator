@@ -8,7 +8,6 @@ EXPOSE 8888
 
 # Setting mode directory
 RUN mkdir -p /home/app
-COPY . /home/app
 WORKDIR /home/app
 ENTRYPOINT [ "pipenv", "run", "python", "main.py" ]
 
@@ -19,4 +18,5 @@ RUN apt-get update \
 
 RUN pip install pipenv
 
+COPY . /home/app
 RUN pipenv install
