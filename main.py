@@ -37,6 +37,20 @@ def add_job(api_key, job_id):
     return abort(400)
 
 
+@app.route("/trigger/status/<api_key>/<jq_id>", methods=["GET", "POST"])
+def get_job(api_key, jq_id):
+    """
+    Fetch a job and its status
+    :param api_key: user id of the client
+    :param jq_id: job queue id
+    :return: job queue id
+    """
+    if Auth.verify_auth_key(api_key):
+        if Auth.verify_job(api_key, jq_id):
+            return trigger.get_job(jq_id)
+    return abort(400)
+
+
 @app.route("/worker/<api_key>", methods=["PUT"])
 def create_worker(api_key):
     """

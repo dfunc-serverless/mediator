@@ -128,6 +128,18 @@ class JobQueue:
         if job is None:
             raise KeyError("Job not found")
         return Job(str(job["job"]["_id"]))
+    
+    def get_job_instance(self, jq_id):
+        """
+        Fetches Job from Job queue with status
+        :param jq_id: Job Queue ID
+        :return: Job Queue data
+        """
+        jq_table = self.__get_db()
+        job = jq_table.find_one({"_id": ObjectId(jq_id)})
+        if job is None:
+            raise KeyError("Job not found")
+        return dumps(job)
 
     def update_status(self, jq_id, worker_id, status: int, data=None):
         """
