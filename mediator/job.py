@@ -129,7 +129,7 @@ class JobQueue:
             raise KeyError("Job not found")
         return Job(str(job["job"]["_id"]))
 
-    def update_status(self, jq_id, status: int, data=None):
+    def update_status(self, jq_id, worker_id, status: int, data=None):
         """
         Status pattern:
             0: In queue
@@ -141,7 +141,9 @@ class JobQueue:
         """
         jq_table = self.__get_db()
         job = jq_table.find_one({"_id": ObjectId(jq_id)})
-        job["status"] = status
+        if job["status"] not in [2, 3]:
+            job["status"] = status
+            job["worker_id"] = worker_id
         job["data"] = data
         jq_table.save(job)
 

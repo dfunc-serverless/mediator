@@ -88,7 +88,7 @@ def register_job(api_key, worker_id, jq_id):
         if Auth.verify_worker(api_key, worker_id):
             worker = Worker(worker_id)
             if request.method == "PUT":
-                job = trigger.initiate_job(jq_id)
+                job = trigger.initiate_job(jq_id, worker_id)
                 worker.add_job(job)
                 return jsonify(job.get_data(json=True))
             elif request.method == "POST":
@@ -96,12 +96,12 @@ def register_job(api_key, worker_id, jq_id):
                 if request.data:
                     data = str(request.data)
                 worker.remove_job()
-                trigger.complete_job(jq_id, 2, data)
+                trigger.complete_job(jq_id, worker_id, 2, data)
                 return "", 200
             elif request.method == "DELETE":
                 data = str(request.data)
                 worker.remove_job()
-                trigger.complete_job(jq_id, 3, data)
+                trigger.complete_job(jq_id, worker_id, 3, data)
                 return "", 200
     abort(400)
 
