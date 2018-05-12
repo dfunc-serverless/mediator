@@ -36,3 +36,11 @@ class Trigger:
         :return:
         """
         self.job_queue.update_status(jq_id, worker_id, status, data)
+
+    def get_job(self, jq_id):
+        """
+        Fetches Job from Job queue with status
+        :param jq_id: Job Queue ID
+        :return: Job Queue data
+        """
+        return self.job_queue.get_job_instance(jq_id)
